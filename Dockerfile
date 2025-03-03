@@ -2,7 +2,9 @@
 FROM node:16
 
 # Installer yt-dlp
-RUN apt-get update && apt-get install -y yt-dlp
+RUN apt-get update -y && \
+    apt-get install -y python3-pip && \
+    pip3 install -U yt-dlp
 
 # Créer un dossier de travail dans le conteneur
 WORKDIR /app
@@ -18,3 +20,5 @@ EXPOSE 3300
 
 # Démarrer ton application avec npm
 CMD ["npm", "start"]
+
+# Mise à jour des packages et installation de yt-dlp
