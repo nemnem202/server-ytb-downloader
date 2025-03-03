@@ -1,0 +1,25 @@
+# Node.js
+node_modules/
+
+# Logs
+npm-debug.log
+yarn-error.log
+*.log
+
+# Dossiers de build
+dist/
+build/
+
+# Fichiers de configuration IDE
+.idea/
+.vscode/
+
+# Fichiers d'environnement
+.env
+
+# Dépendances spécifiques à l'OS
+.DS_Store
+Thumbs.db
+
+# Fichiers Python si tu utilises yt-dlp
+*.pyc
