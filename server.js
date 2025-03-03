@@ -11,7 +11,7 @@ const port = 3300;
 // Autoriser les requêtes CORS
 app.use(
   cors({
-    origin: "*", // Autoriser toutes les origines (à ne pas laisser en production, mais à tester)
+    origin: "https://nemnem202.github.io", // Remplacez par l'URL exacte de votre GitHub Pages
     methods: "GET",
     allowedHeaders: "Content-Type",
   })
