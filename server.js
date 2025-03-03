@@ -9,7 +9,13 @@ const app = express();
 const port = 3300;
 
 // Autoriser les requêtes CORS
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://nemnem202.github.io",
+    methods: "GET",
+    allowedHeaders: "Content-Type",
+  })
+);
 
 exec("yt-dlp --version", (error, stdout, stderr) => {
   if (error) {
