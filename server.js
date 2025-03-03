@@ -11,7 +11,7 @@ const port = 3300;
 // Autoriser les requêtes CORS
 app.use(
   cors({
-    origin: "https://nemnem202.github.io", // Remplacez par l'URL exacte de votre GitHub Pages
+    origin: ["https://nemnem202.github.io", "http://localhost:3000"], // Ajoutez localhost pour le développement
     methods: "GET",
     allowedHeaders: "Content-Type",
   })
