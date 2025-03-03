@@ -11,6 +11,14 @@ const port = 3300;
 // Autoriser les requêtes CORS
 app.use(cors());
 
+exec("yt-dlp --version", (error, stdout, stderr) => {
+  if (error) {
+    console.error("yt-dlp n'est pas installé:", stderr);
+  } else {
+    console.log("yt-dlp version:", stdout);
+  }
+});
+
 app.get("/download", async (req, res) => {
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Méthode non autorisée" });
