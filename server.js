@@ -31,6 +31,7 @@ app.get("/download", async (req, res) => {
   }
 
   const videoUrl = req.query.url;
+  console.log("URL de la vidéo reçue:", videoUrl);
   if (!videoUrl) {
     return res.status(400).json({ error: "URL manquante" });
   }
@@ -38,6 +39,7 @@ app.get("/download", async (req, res) => {
   try {
     // Récupère l'URL de téléchargement direct de la vidéo
     const { stdout } = await execPromise(`yt-dlp -f best -g ${videoUrl}`);
+    console.log("URL de téléchargement direct:", stdout.trim());
     const directUrl = stdout.trim();
 
     // Télécharge la vidéo depuis l'URL directe
