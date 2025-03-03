@@ -38,7 +38,9 @@ app.get("/download", async (req, res) => {
 
   try {
     // Récupère l'URL de téléchargement direct de la vidéo
-    const { stdout } = await execPromise(`yt-dlp -f best -g ${videoUrl}`);
+    const { stdout } = await execPromise(
+      `yt-dlp -f best -g --no-check-certificate ${videoUrl}`
+    );
     console.log("URL de téléchargement direct:", stdout.trim());
     const directUrl = stdout.trim();
 
@@ -46,8 +48,8 @@ app.get("/download", async (req, res) => {
     const videoStream = await fetch(directUrl, {
       headers: {
         "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
-        Referer: "https://www.youtube.com",
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36",
+        Referer: "https://www.youtube.com/",
       },
     });
     console.log("Statut de la réponse videoStream:", videoStream.status);
