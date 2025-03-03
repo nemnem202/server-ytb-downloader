@@ -9,13 +9,7 @@ const app = express();
 const port = 3300;
 
 // Autoriser les requêtes CORS
-app.use(
-  cors({
-    origin: ["https://nemnem202.github.io", "http://localhost:3000"], // Ajoutez localhost pour le développement
-    methods: "GET",
-    allowedHeaders: "Content-Type",
-  })
-);
+app.use(cors());
 
 exec("yt-dlp --version", (error, stdout, stderr) => {
   if (error) {
@@ -31,32 +25,18 @@ app.get("/download", async (req, res) => {
   }
 
   const videoUrl = req.query.url;
-  console.log("URL de la vidéo reçue:", videoUrl);
   if (!videoUrl) {
     return res.status(400).json({ error: "URL manquante" });
   }
 
   try {
     // Récupère l'URL de téléchargement direct de la vidéo
-    const { stdout } = await execPromise(
-      `yt-dlp -f best -g --no-check-certificate ${videoUrl}`
-    );
-    console.log("URL de téléchargement direct:", stdout.trim());
+    const { stdout } = await execPromise(`yt-dlp -f best -g ${videoUrl}`);
     const directUrl = stdout.trim();
 
     // Télécharge la vidéo depuis l'URL directe
-    const videoStream = await fetch(directUrl, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36",
-        Referer: "https://www.youtube.com/",
-      },
-    });
-    console.log("Statut de la réponse videoStream:", videoStream.status);
+    const videoStream = await fetch(directUrl);
     if (!videoStream.ok) {
-      const errorText = await videoStream.text();
-      console.log("Erreur vidéo:", errorText);
-      console.log(`Erreur de récupération vidéo à l'URL: ${directUrl}`);
       return res
         .status(500)
         .json({ error: "Erreur lors de la récupération de la vidéo" });
