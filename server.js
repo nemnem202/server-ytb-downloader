@@ -43,8 +43,18 @@ app.get("/download", async (req, res) => {
     const directUrl = stdout.trim();
 
     // Télécharge la vidéo depuis l'URL directe
-    const videoStream = await fetch(directUrl);
+    const videoStream = await fetch(directUrl, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
+        Referer: "https://www.youtube.com",
+      },
+    });
+    console.log("Statut de la réponse videoStream:", videoStream.status);
     if (!videoStream.ok) {
+      const errorText = await videoStream.text();
+      console.log("Erreur vidéo:", errorText);
+      console.log(`Erreur de récupération vidéo à l'URL: ${directUrl}`);
       return res
         .status(500)
         .json({ error: "Erreur lors de la récupération de la vidéo" });
