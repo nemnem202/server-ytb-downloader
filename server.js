@@ -39,6 +39,7 @@ app.get("/download", async (req, res) => {
   try {
     console.log("Exécution de yt-dlp pour récupérer l'URL de la vidéo...");
     const { stdout } = await execPromise(`yt-dlp -f best -g ${videoUrl}`);
+    console.log("yt-dlp output brut:", stdout);
     const directUrl = stdout.trim();
     console.log("URL directe obtenue:", directUrl);
 
@@ -47,18 +48,21 @@ app.get("/download", async (req, res) => {
     }
 
     console.log("Téléchargement de la vidéo depuis:", directUrl);
-    const videoStream = await fetch(directUrl);
+    const videoStream = await fetch(directUrl, {
+      headers: { "User-Agent": "Mozilla/5.0" },
+    });
+
+    console.log("Statut HTTP de la requête fetch:", videoStream.status);
+    console.log("Headers reçus:", videoStream.headers.raw());
+
     if (!videoStream.ok) {
       console.error(
         "Échec du téléchargement, statut HTTP:",
         videoStream.status
       );
-      return res
-        .status(500)
-        .json({
-          error:
-            "Impossible de récupérer la vidéo. Vérifiez l'URL et réessayez.",
-        });
+      return res.status(500).json({
+        error: "Impossible de récupérer la vidéo. Vérifiez l'URL et réessayez.",
+      });
     }
 
     const videoBuffer = await videoStream.arrayBuffer();
