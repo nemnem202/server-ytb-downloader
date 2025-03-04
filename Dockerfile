@@ -3,7 +3,7 @@ FROM node:16-slim
 
 # Ajouter les dépôts nécessaires pour installer Python 3.8 ou 3.9
 RUN apt-get update -y && \
-    apt-get install -y python3.8 python3-pip && \
+    apt-get install -y python3.7 python3-pip && \
     rm -rf /var/lib/apt/lists/*
 
 # Définir le répertoire de travail
