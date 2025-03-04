@@ -6,8 +6,6 @@ const cors = require("cors");
 const execPromise = promisify(exec);
 const app = express();
 const port = 3300;
-const username = "youtube-downloader";
-const password = "ytbDownloader";
 // Autoriser les requêtes CORS
 app.use(cors());
 
@@ -39,7 +37,7 @@ app.get("/download", async (req, res) => {
   try {
     console.log("Exécution de yt-dlp pour récupérer l'URL de la vidéo...");
     const { stdout } = await execPromise(
-      `yt-dlp -f b -g --username ${username} --password ${password} ${videoUrl}`
+      `yt-dlp -f b -g --cookies cookies.txt ${videoUrl}`
     );
     console.log("yt-dlp output brut:", stdout);
     const directUrl = stdout.trim();
