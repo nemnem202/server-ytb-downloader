@@ -6,6 +6,7 @@ const cors = require("cors");
 const execPromise = promisify(exec);
 const app = express();
 const port = 3300;
+
 // Autoriser les requêtes CORS
 app.use(cors());
 
@@ -37,11 +38,10 @@ app.get("/download", async (req, res) => {
   try {
     console.log("Exécution de yt-dlp pour récupérer l'URL de la vidéo...");
     const { stdout } = await execPromise(
-      `yt-dlp -f b -g --cookies cookies.txt ${videoUrl}`
+      `yt-dlp -f best -g --cookies cookies.txt --user-agent "Mozilla/5.0" --referer "${videoUrl}" ${videoUrl}`
     );
     console.log("yt-dlp output brut:", stdout);
     const directUrl = stdout.trim();
-    console.log("URL directe obtenue:", directUrl);
 
     if (!directUrl) {
       throw new Error("yt-dlp n'a pas retourné d'URL valide.");
@@ -49,12 +49,13 @@ app.get("/download", async (req, res) => {
 
     console.log("Téléchargement de la vidéo depuis:", directUrl);
     const videoStream = await fetch(directUrl, {
-      headers: { "User-Agent": "Mozilla/5.0" },
+      headers: {
+        "User-Agent": "Mozilla/5.0",
+        Referer: videoUrl,
+      },
     });
 
     console.log("Statut HTTP de la requête fetch:", videoStream.status);
-    console.log("Headers reçus:", videoStream.headers.raw());
-
     if (!videoStream.ok) {
       console.error(
         "Échec du téléchargement, statut HTTP:",
@@ -65,12 +66,9 @@ app.get("/download", async (req, res) => {
       });
     }
 
-    const videoBuffer = await videoStream.arrayBuffer();
-    console.log("Vidéo téléchargée avec succès, envoi au client...");
-
     res.setHeader("Content-Disposition", "attachment; filename=video.mp4");
     res.setHeader("Content-Type", "video/mp4");
-    res.end(Buffer.from(videoBuffer));
+    videoStream.body.pipe(res);
   } catch (error) {
     console.error(
       "Erreur lors de l'exécution de yt-dlp ou du téléchargement:",
