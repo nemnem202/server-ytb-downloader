@@ -4,10 +4,10 @@ const fetch = require("node-fetch"); // Version 2.x de node-fetch
 const { promisify } = require("util");
 const cors = require("cors");
 const execPromise = promisify(exec);
-
 const app = express();
 const port = 3300;
-
+const username = "youtube-downloader";
+const password = "ytbDownloader";
 // Autoriser les requêtes CORS
 app.use(cors());
 
@@ -38,7 +38,9 @@ app.get("/download", async (req, res) => {
 
   try {
     console.log("Exécution de yt-dlp pour récupérer l'URL de la vidéo...");
-    const { stdout } = await execPromise(`yt-dlp -f best -g ${videoUrl}`);
+    const { stdout } = await execPromise(
+      `yt-dlp -f b -g --username ${username} --password ${password} ${videoUrl}`
+    );
     console.log("yt-dlp output brut:", stdout);
     const directUrl = stdout.trim();
     console.log("URL directe obtenue:", directUrl);
