@@ -1,13 +1,10 @@
 # Utiliser une image de base avec Node.js
 FROM node:16-slim
 
-# Installer Python 3.9 et pip
+# Ajouter les dépôts nécessaires pour installer Python 3.8 ou 3.9
 RUN apt-get update -y && \
-    apt-get install -y python3.9 python3-pip && \
+    apt-get install -y python3.8 python3-pip && \
     rm -rf /var/lib/apt/lists/*
-
-# Définir Python 3.9 comme version par défaut
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
 
 # Définir le répertoire de travail
 WORKDIR /app
