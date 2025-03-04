@@ -1,82 +1,69 @@
 const express = require("express");
 const { exec } = require("child_process");
-const fetch = require("node-fetch"); // Version 2.x de node-fetch
+const fetch = require("node-fetch"); // Version 2.x
 const { promisify } = require("util");
 const cors = require("cors");
+
 const execPromise = promisify(exec);
 const app = express();
 const port = 3300;
 
-// Autoriser les requêtes CORS
 app.use(cors());
 
-// Vérification de la disponibilité de yt-dlp
 exec("yt-dlp --version", (error, stdout, stderr) => {
   if (error) {
-    console.error("yt-dlp n'est pas installé:", stderr);
+    console.error("yt-dlp non installé:", stderr);
   } else {
     console.log("yt-dlp version détectée:", stdout.trim());
   }
 });
 
 app.get("/download", async (req, res) => {
-  console.log("Requête reçue sur /download avec paramètres:", req.query);
+  console.log("Requête reçue avec paramètres:", req.query);
 
-  if (req.method !== "GET") {
-    console.warn("Méthode non autorisée utilisée:", req.method);
-    return res
-      .status(405)
-      .json({ error: "Méthode non autorisée. Utilisez GET." });
-  }
-
-  const videoUrl = req.query.url;
-  if (!videoUrl) {
-    console.warn("Requête sans URL de vidéo.");
+  if (!req.query.url) {
     return res.status(400).json({ error: "Paramètre 'url' requis." });
   }
 
-  try {
-    console.log("Exécution de yt-dlp pour récupérer l'URL de la vidéo...");
-    const { stdout } = await execPromise(
-      `yt-dlp -f best -g --cookies cookies.txt --user-agent "Mozilla/5.0" --referer "${videoUrl}" ${videoUrl}`
-    );
-    console.log("yt-dlp output brut:", stdout);
-    const directUrl = stdout.trim();
+  const videoUrl = req.query.url;
 
-    if (!directUrl) {
+  try {
+    console.log("Exécution de yt-dlp...");
+    const { stdout } = await execPromise(
+      `yt-dlp -f best -g --cookies cookies.txt ${videoUrl}`
+    );
+    const directUrl = stdout.trim();
+    console.log("URL directe obtenue:", directUrl);
+
+    if (!directUrl || !directUrl.startsWith("http")) {
       throw new Error("yt-dlp n'a pas retourné d'URL valide.");
     }
 
-    console.log("Téléchargement de la vidéo depuis:", directUrl);
+    console.log("Téléchargement de la vidéo...");
     const videoStream = await fetch(directUrl, {
       headers: {
-        "User-Agent": "Mozilla/5.0",
-        Referer: videoUrl,
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+        Referer: "https://www.youtube.com/",
+        Cookie: "CONSENT=PENDING+999;",
       },
     });
 
-    console.log("Statut HTTP de la requête fetch:", videoStream.status);
+    console.log("Statut HTTP:", videoStream.status);
+
     if (!videoStream.ok) {
-      console.error(
-        "Échec du téléchargement, statut HTTP:",
-        videoStream.status
-      );
-      return res.status(500).json({
-        error: "Impossible de récupérer la vidéo. Vérifiez l'URL et réessayez.",
-      });
+      throw new Error(`Erreur HTTP ${videoStream.status}`);
     }
 
     res.setHeader("Content-Disposition", "attachment; filename=video.mp4");
     res.setHeader("Content-Type", "video/mp4");
+
     videoStream.body.pipe(res);
   } catch (error) {
-    console.error(
-      "Erreur lors de l'exécution de yt-dlp ou du téléchargement:",
-      error
-    );
+    console.error("Erreur:", error);
     res
       .status(500)
-      .json({ error: "Une erreur est survenue. Détails: " + error.message });
+      .json({ error: "Échec du téléchargement: " + error.message });
   }
 });
 
